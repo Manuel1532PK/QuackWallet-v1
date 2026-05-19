@@ -31,6 +31,7 @@ import {
 
 // API
 import { cardApi } from "../api/cardApi";
+import { userApi, getImageUrl } from "../api/userApi";
 
 // Sidebar + secciones
 const SECCIONES = [
@@ -40,7 +41,7 @@ const SECCIONES = [
   { title: "Conexiones", icon: IoPeopleOutline, path: "/connections" },
 ];
 
-function Sidebar({ user, navigate, handleLogout, nombreUsuario, location }) {
+function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagenPerfil }) {
   const menuLinks = [
     { name: "Inicio", path: "/home", icon: IoHomeOutline },
     { name: "Tarjetas", path: "/cards", icon: IoCardOutline },
@@ -66,7 +67,16 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location }) {
       </div>
 
       <div className="p-3 text-center border-bottom bg-light">
-        <IoPersonCircleOutline size={30} className="text-secondary mb-1" />
+        {imagenPerfil ? (
+          <img
+            src={getImageUrl(imagenPerfil)}
+            alt="Perfil"
+            className="rounded-circle mb-1"
+            style={{ width: "40px", height: "40px", objectFit: "cover" }}
+          />
+        ) : (
+          <IoPersonCircleOutline size={30} className="text-secondary mb-1" />
+        )}
         <p className="mb-0 fw-bold">{nombreUsuario}</p>
         <small className="text-muted">ID: {user?.id}</small>
       </div>
@@ -296,7 +306,7 @@ export default function Cards() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-
+  const [userProfile, setUserProfile] = useState(null);
   const [tarjetas, setTarjetas] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -305,6 +315,16 @@ export default function Cards() {
   const [success, setSuccess] = useState("");
 
   // Cargar tarjetas al montar el componente
+  const loadUserProfile = useCallback(async () => {
+    if (!user) return;
+    try {
+      const response = await userApi.getCompleteProfile(user.id);
+      setUserProfile(response.data);
+    } catch (err) {
+      console.error("Error al cargar perfil en Cards:", err);
+    }
+  }, [user]);
+
   const loadCards = useCallback(async () => {
   if (!user) return; 
   try {
@@ -329,6 +349,12 @@ useEffect(() => {
 useEffect(() => {
   if (!user) navigate("/login");
 }, [user, navigate]);
+
+useEffect(() => {
+  if (user) {
+    loadUserProfile();
+  }
+}, [loadUserProfile]);
 
   const handleAddCard = async (cardData) => {
     try {
@@ -371,7 +397,8 @@ useEffect(() => {
 
   if (!user) return null;
 
-  const nombreUsuario = user.nombre;
+  const nombreUsuario = userProfile?.Nombre_Usuario || user.nombre;
+  const imagenPerfil = userProfile?.Imagen_Perfil || user?.Imagen_Perfil || null;
 
   return (
     <div className="d-flex w-100 vh-100">
@@ -381,6 +408,7 @@ useEffect(() => {
         location={location}
         nombreUsuario={nombreUsuario}
         handleLogout={logout}
+        imagenPerfil={imagenPerfil}
       />
 
       <div

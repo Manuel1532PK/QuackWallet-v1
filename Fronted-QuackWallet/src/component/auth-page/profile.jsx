@@ -64,7 +64,7 @@ const SECCIONES = [
   },
 ];
 
-function Sidebar({ user, navigate, handleLogout, nombreUsuario, location }) {
+function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagenPerfil }) {
   const menuLinks = [
     { name: "Inicio", path: "/home", icon: IoHomeOutline },
     { name: "Tarjetas", path: "/cards", icon: IoCardOutline },
@@ -93,7 +93,16 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location }) {
 
       {/* User */}
       <div className="p-3 text-center border-bottom bg-light">
-        <IoPersonCircleOutline size={30} className="text-secondary mb-1" />
+        {imagenPerfil ? (
+          <img
+            src={getImageUrl(imagenPerfil)}
+            alt="Perfil"
+            className="rounded-circle mb-1"
+            style={{ width: "40px", height: "40px", objectFit: "cover" }}
+          />
+        ) : (
+          <IoPersonCircleOutline size={30} className="text-secondary mb-1" />
+        )}
         <p className="mb-0 fw-bold">{nombreUsuario}</p>
         <small className="text-muted">
           ID: {user?.id || "No disponible"}
@@ -441,6 +450,7 @@ export default function Profile() {
 
   const profileData = userProfile || user;
   const nombreUsuario = profileData.Nombre_Usuario || profileData.nombre;
+  const imagenPerfil = profileData.Imagen_Perfil || user?.Imagen_Perfil || null;
 
   return (
     <div className="d-flex w-100 vh-100" style={{ backgroundColor: "#fef5da" }}>
@@ -450,6 +460,7 @@ export default function Profile() {
         location={location}
         nombreUsuario={nombreUsuario}
         handleLogout={logout}
+        imagenPerfil={imagenPerfil}
       />
 
       <div
