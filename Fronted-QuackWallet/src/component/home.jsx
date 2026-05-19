@@ -23,6 +23,8 @@ import {
   IoPeopleOutline 
 } from 'react-icons/io5';
 
+import logoSrc from "../assets/Logo_QuackWallet.png";
+
 // Definición de las secciones/tarjetas principales
 // Usando colores de Bootstrap para los estilos de íconos y botones
 const SECCIONES = [
@@ -60,42 +62,59 @@ const SECCIONES = [
  * Componente que representa la barra de navegación lateral (Sidebar).
  * @param {object} props - Propiedades del componente.
  */
+const linkStyle = (isActive) => ({
+  display: 'flex',
+  alignItems: 'center',
+  color: isActive ? '#0b1e3d' : '#c0c8d4',
+  backgroundColor: isActive ? '#f4b942' : 'transparent',
+  borderRadius: '8px',
+  marginBottom: '4px',
+  padding: '8px 12px',
+  fontWeight: isActive ? '700' : '400',
+  textDecoration: 'none',
+  cursor: 'pointer',
+  transition: 'all 0.2s ease',
+});
+
 function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagenPerfil }) {
     
-    // Lista de enlaces principales del menú lateral con RUTAS CORREGIDAS
     const menuLinks = [
         { name: "Inicio", path: "/home", icon: IoHomeOutline },
         { name: "Tarjetas", path: "/cards", icon: IoCardOutline }, 
         { name: "Perfil", path: "/profile", icon: IoPersonCircleOutline },
         { name: "Configuración", path: "/configuracion", icon: IoSettingsOutline },
     ];
-    
-    // Clase de Bootstrap para el acento de enlace activo (el borde)
-    const activeBorderColor = 'border-warning'; 
 
     return (
-        // Sidebar con fondo blanco (bg-white) - Revertido del color fijo
-        <div 
-            className={`sidebar d-flex flex-column bg-white border-end shadow-lg`} 
-            style={{ 
-                width: '250px', 
-                minWidth: '250px', 
-                height: '100vh', 
-                position: 'fixed', 
-                zIndex: 1000,
-                left: 0, 
-                top: 0,
-            }}
-        >
-            {/* Logo/Marca: Fondo blanco, texto oscuro */}
-            <div className="p-4 border-bottom d-flex align-items-center justify-content-center" style={{height: '80px'}}>
-                <span className="fw-bolder fs-3 text-dark text-decoration-none">
-                    <span className="text-warning me-1"></span>Quack<span className="fw-normal">Wallet</span>
-                </span>
+        <div className="sidebar" style={{ 
+            width: '280px', 
+            minWidth: '280px', 
+            height: '100vh', 
+            position: 'fixed', 
+            zIndex: 1000,
+            left: 0, 
+            top: 0,
+            backgroundColor: '#0b1e3d',
+            display: 'flex',
+            flexDirection: 'column',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+        }}>
+            {/* Header con logo */}
+            <div style={{ 
+                display: 'flex', alignItems: 'center', 
+                padding: '14px 20px',
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+            }}>
+                <img src={logoSrc} alt="QuackWallet" style={{ height: '38px', marginRight: '10px' }} />
+                <div>
+                    <span style={{ color: '#f4b942', fontSize: '20px', fontWeight: '700' }}>Quack</span>
+                    <span style={{ color: '#ffffff', fontSize: '20px', fontWeight: '300' }}>Wallet</span>
+                </div>
             </div>
-            
-            {/* Información del Usuario: Fondo gris claro, texto oscuro */}
-            <div className="p-3 text-center border-bottom" style={{backgroundColor: '#f8f9fa'}}>
+
+            {/* Usuario */}
+            <div className="p-3 text-center" style={{borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
                 {imagenPerfil ? (
                   <img
                     src={getImageUrl(imagenPerfil)}
@@ -104,43 +123,47 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
                     style={{ width: "40px", height: "40px", objectFit: "cover" }}
                   />
                 ) : (
-                  <IoPersonCircleOutline size={30} className="text-secondary mb-1" />
+                  <IoPersonCircleOutline size={30} style={{color: '#8899aa'}} />
                 )}
-                <p className="mb-0 fw-bold fs-6 text-dark">{nombreUsuario}</p>
-                <small className="text-muted">ID: {user?.id || 'No disponible'}</small>
+                <p className="mb-0 fw-bold" style={{color: '#ffffff'}}>{nombreUsuario}</p>
+                <small style={{color: '#8899aa'}}>ID: {user?.id || 'No disponible'}</small>
             </div>
 
-            {/* Enlaces Principales del Menú */}
-            <Nav className="flex-column p-3 flex-grow-1" activeKey={location.pathname}>
+            {/* Menú */}
+            <Nav className="flex-column p-3 flex-grow-1">
                 {menuLinks.map((link) => {
                     const isActive = location.pathname === link.path;
                     return (
-                        <Nav.Link 
-                            key={link.path} 
-                            onClick={() => navigate(link.path)} 
+                        <Nav.Link
+                            key={link.path}
+                            onClick={() => navigate(link.path)}
                             href={link.path}
-                            // Estilo de enlace activo/inactivo (revertido a sutil)
-                            className={`d-flex align-items-center mb-1 rounded py-2 ${
-                                isActive 
-                                    ? `bg-warning-subtle text-dark fw-bold border-start border-4 ${activeBorderColor}` // Activo: fondo sutil, texto oscuro
-                                    : 'text-dark-50 hover-link-sidebar' // Inactivo: texto atenuado, hover sutil
-                            }`}
+                            style={linkStyle(isActive)}
+                            onMouseEnter={(e) => {
+                                if (!isActive) {
+                                    e.target.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                                    e.target.style.color = '#ffffff';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!isActive) {
+                                    e.target.style.backgroundColor = 'transparent';
+                                    e.target.style.color = '#c0c8d4';
+                                }
+                            }}
                         >
-                            <link.icon className="me-3" size={20} />
+                            <link.icon size={20} className="me-3" />
                             {link.name}
                         </Nav.Link>
                     );
                 })}
 
-                {/* Separador */}
-                <hr className="my-3"/>
+                <hr style={{borderColor: 'rgba(255,255,255,0.1)', margin: '12px 0'}} />
                 
-                {/* Título de Funciones */}
-                <h6 className="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase small fw-bold">
-                    <span>Funciones Rápidas</span>
+                <h6 className="px-3 mt-2 mb-2 small fw-bold text-uppercase" style={{color: '#8899aa'}}>
+                    Funciones rápidas
                 </h6>
                 
-                {/* Enlaces de Funcionalidad Adicional */}
                 {SECCIONES.map((seccion) => {
                     const isActive = location.pathname === seccion.path;
                     return (
@@ -148,29 +171,48 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
                             key={seccion.path}
                             onClick={() => navigate(seccion.path)}
                             href={seccion.path}
-                            // Estilo de enlace activo/inactivo (revertido a sutil)
-                            className={`d-flex align-items-center mb-1 rounded py-2 ${
-                                isActive 
-                                    ? `bg-warning-subtle text-dark fw-bold border-start border-4 ${activeBorderColor}`
-                                    : 'text-dark-50 hover-link-sidebar'
-                            }`}
+                            style={linkStyle(isActive)}
+                            onMouseEnter={(e) => {
+                                if (!isActive) {
+                                    e.target.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                                    e.target.style.color = '#ffffff';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!isActive) {
+                                    e.target.style.backgroundColor = 'transparent';
+                                    e.target.style.color = '#c0c8d4';
+                                }
+                            }}
                         >
-                            <seccion.icon className="me-3" size={20} />
+                            <seccion.icon size={20} className="me-3" />
                             {seccion.title}
                         </Nav.Link>
                     );
                 })}
             </Nav>
 
-            {/* Footer del Sidebar: Botón de Salir */}
-            <div className="p-3 border-top">
-                <Button 
-                    variant="danger" 
-                    onClick={handleLogout} 
-                    className="w-100 d-flex align-items-center justify-content-center"
+            {/* Cerrar sesión */}
+            <div className="p-3" style={{borderTop: '1px solid rgba(255,255,255,0.1)'}}>
+                <button
+                    onClick={handleLogout}
+                    style={{
+                        width: '100%',
+                        padding: '10px',
+                        backgroundColor: '#f4b942',
+                        border: 'none',
+                        borderRadius: '8px',
+                        color: '#0b1e3d',
+                        fontWeight: '700',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                    }}
                 >
                     <IoLogOutOutline className="me-2" size={20} /> Cerrar Sesión
-                </Button>
+                </button>
             </div>
         </div>
     );
@@ -227,18 +269,16 @@ export default function Home() {
     );
   }
 
+  const SIDEBAR_W = '280px';
   const nombreUsuario = userProfile?.Nombre_Usuario || user?.nombre || "Usuario";
   const imagenPerfil = userProfile?.Imagen_Perfil || user?.Imagen_Perfil || null; 
-  const sidebarWidth = '250px';
-  const accentBgColor = '#fef5da'; // Color de acento para el fondo general (QuackWallet color)
+  const accentBgColor = '#fef5da';
 
   return (
-    // Wrapper principal: Ocupa todo el viewport, con el color de acento
     <div 
         className="d-flex w-100 vh-100 dashboard-wrapper" 
         style={{ backgroundColor: accentBgColor }} 
     > 
-        {/* Sidebar Fijo (bg-white) */}
         <Sidebar 
             user={user} 
             navigate={navigate} 
@@ -248,18 +288,15 @@ export default function Home() {
             imagenPerfil={imagenPerfil}
         />
 
-        {/* ---------------------------------------------------- */}
-        {/* Contenido Principal (Main) - Empujado por el Sidebar */}
-        {/* ---------------------------------------------------- */}
         <div 
             className="content-area d-flex flex-column overflow-auto flex-grow-1 bg-white" 
             style={{ 
-                marginLeft: sidebarWidth, 
-                width: `calc(100% - ${sidebarWidth})`,
+                marginLeft: SIDEBAR_W, 
+                width: `calc(100% - ${SIDEBAR_W})`,
                 height: '100vh',
             }} 
         >
-            {/* Barra superior visible solo en móvil (Bootstrap d-block d-lg-none) */}
+            {/* Barra superior visible solo en móvil */}
             <div className="d-block d-lg-none p-3 border-bottom bg-white shadow-sm">
                 <span className="fw-bolder text-dark">
                     <span className="text-warning me-2"></span>QuackWallet
@@ -269,11 +306,11 @@ export default function Home() {
 
             {/* Contenedor principal con espaciado ajustado */}
             <Container fluid className="p-4 p-lg-5 p-xl-6 flex-grow-1"> 
-              <div className="mb-5">
+              <div className="mb-5 p-4" style={{ backgroundColor: '#f9d976', borderRadius: '16px' }}>
                 <h1 className="display-5 fw-bold text-dark mb-1">
                   Bienvenido de nuevo, {nombreUsuario}!
                 </h1>
-                <p className="lead text-muted">
+                <p className="lead text-muted mb-0">
                   Aca puedes revisar y gestionar todas las funcionalidades de tu QuackWallet.
                 </p>
               </div>
@@ -316,16 +353,8 @@ export default function Home() {
             </div>
         </div>
       
-        {/* Estilos CSS personalizados para el hover y responsividad */}
-        <style global jsx>
+        <style>
           {`
-            /* Estilo del link al pasar el ratón en el Sidebar (fondo blanco) */
-            .hover-link-sidebar:hover {
-                background-color: #f0f0f0 !important; 
-                color: #000 !important;
-            }
-
-            /* Estilo de la tarjeta */
             .card-hover {
               transition: all 0.3s ease;
             }
@@ -333,21 +362,17 @@ export default function Home() {
               transform: translateY(-5px);
               box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
             }
-            
-            /* RESPONSIVIDAD: Ocultar el Sidebar en pantallas pequeñas (<992px) */
+
             @media (max-width: 991.98px) {
               .sidebar {
-                  display: none !important; /* Oculta el sidebar fijo */
+                  display: none !important;
               }
-              /* Ajusta el contenido principal para que no tenga margen izquierdo */
               .content-area {
                   margin-left: 0 !important;
               }
-              /* Añade un padding superior para compensar la barra móvil */
               .dashboard-wrapper {
                   padding-top: 55px; 
               }
-              /* Fija la barra superior móvil para que no se desplace */
               .d-block.d-lg-none {
                   position: fixed;
                   top: 0;

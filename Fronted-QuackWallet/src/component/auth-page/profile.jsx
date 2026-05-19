@@ -5,7 +5,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 // Bootstrap
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
-import Card from "react-bootstrap/Card";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
@@ -31,6 +30,8 @@ import {
 
 // API
 import { userApi, getImageUrl } from "../../api/userApi";
+
+import logoSrc from "../../assets/Logo_QuackWallet.png";
 
 // Sidebar + secciones (mantén igual)
 const SECCIONES = [
@@ -72,27 +73,50 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
     { name: "Configuración", path: "/configuracion", icon: IoSettingsOutline },
   ];
 
+  const linkStyle = (isActive) => ({
+    display: 'flex',
+    alignItems: 'center',
+    color: isActive ? '#0b1e3d' : '#c0c8d4',
+    backgroundColor: isActive ? '#f4b942' : 'transparent',
+    borderRadius: '8px',
+    marginBottom: '4px',
+    padding: '8px 12px',
+    fontWeight: isActive ? '700' : '400',
+    textDecoration: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  });
+
   return (
-    <div
-      className="sidebar d-flex flex-column bg-white border-end shadow-lg"
-      style={{
-        width: "250px",
-        minWidth: "250px",
-        height: "100vh",
-        position: "fixed",
-        left: 0,
-        top: 0,
-        zIndex: 1000,
-      }}
-    >
-      {/* Logo */}
-      <div className="p-4 border-bottom text-center fs-3 fw-bold">
-        <span className="text-warning me-1"></span>Quack
-        <span className="fw-normal">Wallet</span>
+    <div className="sidebar" style={{ 
+      width: '280px', 
+      minWidth: '280px', 
+      height: '100vh', 
+      position: 'fixed', 
+      left: 0, 
+      top: 0, 
+      zIndex: 1000,
+      backgroundColor: '#0b1e3d',
+      display: 'flex',
+      flexDirection: 'column',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+    }}>
+      {/* Header con logo */}
+      <div style={{ 
+        display: 'flex', alignItems: 'center', 
+        padding: '14px 20px',
+        borderBottom: '1px solid rgba(255,255,255,0.1)',
+      }}>
+        <img src={logoSrc} alt="QuackWallet" style={{ height: '38px', marginRight: '10px' }} />
+        <div>
+          <span style={{ color: '#f4b942', fontSize: '20px', fontWeight: '700' }}>Quack</span>
+          <span style={{ color: '#ffffff', fontSize: '20px', fontWeight: '300' }}>Wallet</span>
+        </div>
       </div>
 
       {/* User */}
-      <div className="p-3 text-center border-bottom bg-light">
+      <div className="p-3 text-center" style={{borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
         {imagenPerfil ? (
           <img
             src={getImageUrl(imagenPerfil)}
@@ -101,15 +125,15 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
             style={{ width: "40px", height: "40px", objectFit: "cover" }}
           />
         ) : (
-          <IoPersonCircleOutline size={30} className="text-secondary mb-1" />
+          <IoPersonCircleOutline size={30} style={{color: '#8899aa'}} />
         )}
-        <p className="mb-0 fw-bold">{nombreUsuario}</p>
-        <small className="text-muted">
+        <p className="mb-0 fw-bold" style={{color: '#ffffff'}}>{nombreUsuario}</p>
+        <small style={{color: '#8899aa'}}>
           ID: {user?.id || "No disponible"}
         </small>
       </div>
 
-      <Nav className="flex-column p-3 flex-grow-1" activeKey={location.pathname}>
+      <Nav className="flex-column p-3 flex-grow-1">
         {menuLinks.map((link) => {
           const isActive = location.pathname === link.path;
           return (
@@ -117,10 +141,19 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
               key={link.path}
               onClick={() => navigate(link.path)}
               href={link.path}
-              className={`d-flex align-items-center mb-1 rounded py-2 ${isActive
-                  ? "bg-warning-subtle text-dark fw-bold border-start border-4 border-warning"
-                  : "text-dark-50 hover-link-sidebar"
-                }`}
+              style={linkStyle(isActive)}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.target.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                  e.target.style.color = '#ffffff';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.target.style.backgroundColor = 'transparent';
+                  e.target.style.color = '#c0c8d4';
+                }
+              }}
             >
               <link.icon size={20} className="me-3" />
               {link.name}
@@ -128,9 +161,9 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
           );
         })}
 
-        <hr className="my-3" />
+        <hr style={{borderColor: 'rgba(255,255,255,0.1)', margin: '12px 0'}} />
 
-        <h6 className="px-3 mt-3 text-muted small fw-bold text-uppercase">
+        <h6 className="px-3 mt-2 mb-2 small fw-bold text-uppercase" style={{color: '#8899aa'}}>
           Funciones rápidas
         </h6>
 
@@ -141,10 +174,19 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
               key={sec.path}
               onClick={() => navigate(sec.path)}
               href={sec.path}
-              className={`d-flex align-items-center mb-1 rounded py-2 ${isActive
-                  ? "bg-warning-subtle text-dark fw-bold border-start border-4 border-warning"
-                  : "text-dark-50 hover-link-sidebar"
-                }`}
+              style={linkStyle(isActive)}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.target.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                  e.target.style.color = '#ffffff';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.target.style.backgroundColor = 'transparent';
+                  e.target.style.color = '#c0c8d4';
+                }
+              }}
             >
               <sec.icon size={20} className="me-3" />
               {sec.title}
@@ -153,15 +195,27 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
         })}
       </Nav>
 
-      <div className="p-3 border-top">
-        <Button
-          variant="danger"
+      {/* Cerrar sesión */}
+      <div className="p-3" style={{borderTop: '1px solid rgba(255,255,255,0.1)'}}>
+        <button
           onClick={handleLogout}
-          className="w-100 d-flex align-items-center justify-content-center"
+          style={{
+            width: '100%',
+            padding: '10px',
+            backgroundColor: '#f4b942',
+            border: 'none',
+            borderRadius: '8px',
+            color: '#0b1e3d',
+            fontWeight: '700',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontSize: '16px',
+          }}
         >
-          <IoLogOutOutline size={20} className="me-2" />
-          Cerrar sesión
-        </Button>
+          <IoLogOutOutline className="me-2" size={20} /> Cerrar Sesión
+        </button>
       </div>
     </div>
   );
@@ -465,11 +519,14 @@ export default function Profile() {
 
       <div
         className="content-area flex-grow-1 d-flex flex-column bg-white"
-        style={{ marginLeft: "250px", height: "100vh" }}
+        style={{ marginLeft: "280px", height: "100vh" }}
       >
         <Container fluid className="p-4 p-lg-5 flex-grow-1">
-          <h1 className="fw-bold mb-3">Mi Perfil</h1>
-          <p className="text-muted">Gestiona tu información personal.</p>
+          {/* Titulo en cuadro amarillo fuerte */}
+          <div className="mb-5 p-4" style={{ backgroundColor: '#f9d976', borderRadius: '16px' }}>
+            <h1 className="fw-bold mb-1">Mi Perfil</h1>
+            <p className="text-muted mb-0">Gestiona tu información personal.</p>
+          </div>
 
           {/* Alertas */}
           {error && <Alert variant="danger" onClose={() => setError("")} dismissible>{error}</Alert>}
@@ -481,40 +538,39 @@ export default function Profile() {
               <p className="mt-2 text-muted">Cargando perfil...</p>
             </div>
           ) : (
-            /* Card perfil */
-            <Card className="p-4 shadow-sm border-0">
-              <Row>
-                {/* Lado izquierdo: imagen y botón */}
-                <Col
-                  xs={12}
-                  md={4}
-                  className="d-flex flex-column align-items-center justify-content-center mb-4 mb-md-0"
-                >
-                  {profileData.Imagen_Perfil ? (
-                    <img
-                      src={getImageUrl(profileData.Imagen_Perfil)}
-                      alt="Perfil"
-                      className="rounded-circle mb-3"
-                      style={{ width: "120px", height: "120px", objectFit: "cover" }}
-                    />
-                  ) : (
-                    <IoPersonCircleOutline size={120} className="text-secondary mb-3" />
-                  )}
+            <Row className="g-4">
+              {/* Editar Perfil */}
+              <Col xs={12} md={5}>
+                <div className="profile-data-box p-4" style={{ backgroundColor: '#f9d976', borderRadius: '16px', boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }}>
+                  <h5 className="fw-bold mb-4 text-center">Editar Perfil</h5>
+                  <div className="d-flex flex-column align-items-center">
+                    {profileData.Imagen_Perfil ? (
+                      <img
+                        src={getImageUrl(profileData.Imagen_Perfil)}
+                        alt="Perfil"
+                        className="rounded-circle mb-3"
+                        style={{ width: "120px", height: "120px", objectFit: "cover" }}
+                      />
+                    ) : (
+                      <IoPersonCircleOutline size={120} className="text-secondary mb-3" />
+                    )}
 
-                  <Button
-                    variant="warning"
-                    className="fw-bold px-4"
-                    onClick={() => setShowEditModal(true)}
-                  >
-                    <IoPencilOutline className="me-2" />
-                    Editar perfil
-                  </Button>
-                </Col>
+                    <Button
+                      variant="warning"
+                      className="fw-bold px-4"
+                      onClick={() => setShowEditModal(true)}
+                    >
+                      <IoPencilOutline className="me-2" />
+                      Editar perfil
+                    </Button>
+                  </div>
+                </div>
+              </Col>
 
-                {/* Lado derecho: datos personales */}
-                <Col xs={12} md={8}>
+              {/* Datos del Perfil */}
+              <Col xs={12} md={7}>
+                <div className="profile-data-box p-4" style={{ backgroundColor: '#f9d976', borderRadius: '16px', boxShadow: '0 4px 16px rgba(0,0,0,0.12)' }}>
                   <h4 className="fw-bold mb-3">Datos Personales</h4>
-
                   <p>
                     <strong>Nombre:</strong> {nombreUsuario}
                   </p>
@@ -534,9 +590,9 @@ export default function Profile() {
                   <p>
                     <strong>Estado:</strong> <span className="badge bg-success">{profileData.Estado || "Activo"}</span>
                   </p>
-                </Col>
-              </Row>
-            </Card>
+                </div>
+              </Col>
+            </Row>
           )}
         </Container>
 
@@ -549,6 +605,15 @@ export default function Profile() {
           isLoading={isLoading}
         />
 
+        <style>{`
+          .profile-data-box {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+          }
+          .profile-data-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+          }
+        `}</style>
         {/* FOOTER */}
         <footer
           className="text-center text-muted py-3 border-top"

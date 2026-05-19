@@ -6,7 +6,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import Nav from "react-bootstrap/Nav";
 import Modal from "react-bootstrap/Modal";
@@ -27,11 +26,96 @@ import {
   IoPeopleOutline,
   IoTrashOutline,
   IoAddOutline,
+  IoArrowBackOutline,
 } from "react-icons/io5";
 
 // API
 import { cardApi } from "../api/cardApi";
 import { userApi, getImageUrl } from "../api/userApi";
+
+import logoSrc from "../assets/Logo_QuackWallet.png";
+
+const CARD_COLORS = [
+  { bg: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', text: '#ffffff', chip: '#f4b942' },
+  { bg: 'linear-gradient(135deg, #6c3483 0%, #8e44ad 50%, #bb8fce 100%)', text: '#ffffff', chip: '#f4b942' },
+  { bg: 'linear-gradient(135deg, #1b4332 0%, #2d6a4f 50%, #40916c 100%)', text: '#ffffff', chip: '#f4b942' },
+  { bg: 'linear-gradient(135deg, #7f0000 0%, #b71c1c 50%, #e53935 100%)', text: '#ffffff', chip: '#f4b942' },
+  { bg: 'linear-gradient(135deg, #0d47a1 0%, #1565c0 50%, #1976d2 100%)', text: '#ffffff', chip: '#f4b942' },
+  { bg: 'linear-gradient(135deg, #e65100 0%, #ef6c00 50%, #f57c00 100%)', text: '#ffffff', chip: '#f4b942' },
+  { bg: 'linear-gradient(135deg, #004d40 0%, #00695c 50%, #00796b 100%)', text: '#ffffff', chip: '#f4b942' },
+  { bg: 'linear-gradient(135deg, #4a148c 0%, #6a1b9a 50%, #8e24aa 100%)', text: '#ffffff', chip: '#f4b942' },
+];
+
+function CreditCardView({ card, onClick, style }) {
+  const colorIndex = card.ID_Tarjetas ? card.ID_Tarjetas % CARD_COLORS.length : 0;
+  const colors = CARD_COLORS[colorIndex];
+  const lastFour = card.Numero ? card.Numero.slice(-4) : '****';
+
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        width: '100%',
+        aspectRatio: '1.586 / 1',
+        borderRadius: '16px',
+        background: colors.bg,
+        padding: '24px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        cursor: onClick ? 'pointer' : 'default',
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        ...style,
+      }}
+      onMouseEnter={(e) => {
+        if (onClick) {
+          e.currentTarget.style.transform = 'translateY(-4px)';
+          e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.3)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (onClick) {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.2)';
+        }
+      }}
+    >
+      {/* Chip */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{
+          width: '45px', height: '34px',
+          borderRadius: '6px',
+          background: `linear-gradient(135deg, ${colors.chip}, #d4a017)`,
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          <div style={{ position: 'absolute', width: '100%', height: '100%', background: 'rgba(255,255,255,0.15)', clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }} />
+        </div>
+        <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: colors.text, fontSize: '11px', fontWeight: '700', padding: '2px 10px', borderRadius: '10px', letterSpacing: '0.5px' }}>{card.Tipo_tarjeta || 'Tarjeta'}</div>
+      </div>
+
+      {/* Número */}
+      <div style={{ color: colors.text, fontSize: '22px', letterSpacing: '3px', fontWeight: '500', fontFamily: 'monospace', textAlign: 'center', marginTop: '8px' }}>
+        **** **** **** {lastFour}
+      </div>
+
+      {/* Bottom info */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div>
+          <div style={{ color: colors.text, fontSize: '10px', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px' }}>Titular</div>
+          <div style={{ color: colors.text, fontSize: '15px', fontWeight: '600' }}>{card.Nombre}</div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ color: colors.text, fontSize: '10px', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px' }}>Saldo</div>
+          <div style={{ color: colors.text, fontSize: '16px', fontWeight: '700' }}>${card.Saldo ? Number(card.Saldo).toLocaleString() : '0.00'}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Sidebar + secciones
 const SECCIONES = [
@@ -49,24 +133,52 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
     { name: "Configuración", path: "/configuracion", icon: IoSettingsOutline },
   ];
 
+  const linkStyle = (isActive) => ({
+    display: 'flex',
+    alignItems: 'center',
+    color: isActive ? '#0b1e3d' : '#c0c8d4',
+    backgroundColor: isActive ? '#f4b942' : 'transparent',
+    borderRadius: '8px',
+    marginBottom: '4px',
+    padding: '8px 12px',
+    fontWeight: isActive ? '700' : '400',
+    textDecoration: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  });
+
   return (
-    <div
-      className="sidebar d-flex flex-column bg-white border-end shadow-lg"
-      style={{
-        width: "250px",
-        minWidth: "250px",
-        height: "100vh",
-        position: "fixed",
-        left: 0,
-        top: 0,
-        zIndex: 1000,
-      }}
-    >
-      <div className="p-4 border-bottom text-center fs-3 fw-bold">
-        Quack<span className="fw-normal">Wallet</span>
+    <div className="sidebar" style={{ 
+      width: '280px', 
+      minWidth: '280px', 
+      height: '100vh', 
+      position: 'fixed', 
+      left: 0, 
+      top: 0, 
+      zIndex: 1000,
+      backgroundColor: '#0b1e3d',
+      display: 'flex',
+      flexDirection: 'column',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      scrollbarWidth: 'thin',
+      scrollbarColor: '#f4b942 #0b1e3d',
+    }}>
+      {/* Header con logo */}
+      <div style={{ 
+        display: 'flex', alignItems: 'center', 
+        padding: '14px 20px',
+        borderBottom: '1px solid rgba(255,255,255,0.1)',
+      }}>
+        <img src={logoSrc} alt="QuackWallet" style={{ height: '38px', marginRight: '10px' }} />
+        <div>
+          <span style={{ color: '#f4b942', fontSize: '20px', fontWeight: '700' }}>Quack</span>
+          <span style={{ color: '#ffffff', fontSize: '20px', fontWeight: '300' }}>Wallet</span>
+        </div>
       </div>
 
-      <div className="p-3 text-center border-bottom bg-light">
+      {/* Usuario */}
+      <div className="p-3 text-center" style={{borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
         {imagenPerfil ? (
           <img
             src={getImageUrl(imagenPerfil)}
@@ -75,24 +187,32 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
             style={{ width: "40px", height: "40px", objectFit: "cover" }}
           />
         ) : (
-          <IoPersonCircleOutline size={30} className="text-secondary mb-1" />
+          <IoPersonCircleOutline size={30} style={{color: '#8899aa'}} />
         )}
-        <p className="mb-0 fw-bold">{nombreUsuario}</p>
-        <small className="text-muted">ID: {user?.id}</small>
+        <p className="mb-0 fw-bold" style={{color: '#ffffff'}}>{nombreUsuario}</p>
+        <small style={{color: '#8899aa'}}>ID: {user?.id}</small>
       </div>
 
-      <Nav className="flex-column p-3 flex-grow-1" activeKey={location.pathname}>
+      <Nav className="flex-column p-3 flex-grow-1">
         {menuLinks.map((link) => {
           const isActive = location.pathname === link.path;
           return (
             <Nav.Link
               key={link.path}
               onClick={() => navigate(link.path)}
-              className={`d-flex align-items-center mb-1 rounded py-2 ${
-                isActive
-                  ? "bg-warning-subtle border-start border-4 border-warning fw-bold"
-                  : "text-dark-50"
-              }`}
+              style={linkStyle(isActive)}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.target.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                  e.target.style.color = '#ffffff';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.target.style.backgroundColor = 'transparent';
+                  e.target.style.color = '#c0c8d4';
+                }
+              }}
             >
               <link.icon size={20} className="me-3" />
               {link.name}
@@ -100,9 +220,9 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
           );
         })}
 
-        <hr />
+        <hr style={{borderColor: 'rgba(255,255,255,0.1)', margin: '12px 0'}} />
 
-        <h6 className="px-3 text-muted small fw-bold text-uppercase">Funciones rápidas</h6>
+        <h6 className="px-3 mt-2 mb-2 small fw-bold text-uppercase" style={{color: '#8899aa'}}>Funciones rápidas</h6>
 
         {SECCIONES.map((sec) => {
           const isActive = location.pathname === sec.path;
@@ -110,11 +230,19 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
             <Nav.Link
               key={sec.path}
               onClick={() => navigate(sec.path)}
-              className={`d-flex align-items-center mb-1 rounded py-2 ${
-                isActive
-                  ? "bg-warning-subtle border-start border-4 border-warning fw-bold"
-                  : "text-dark-50"
-              }`}
+              style={linkStyle(isActive)}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.target.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                  e.target.style.color = '#ffffff';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.target.style.backgroundColor = 'transparent';
+                  e.target.style.color = '#c0c8d4';
+                }
+              }}
             >
               <sec.icon size={20} className="me-3" />
               {sec.title}
@@ -123,12 +251,34 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
         })}
       </Nav>
 
-      <div className="p-3 border-top">
-        <Button variant="danger" className="w-100" onClick={handleLogout}>
-          <IoLogOutOutline className="me-2" size={20} />
-          Cerrar sesión
-        </Button>
+      {/* Cerrar sesión */}
+      <div className="p-3" style={{borderTop: '1px solid rgba(255,255,255,0.1)'}}>
+        <button
+          onClick={handleLogout}
+          style={{
+            width: '100%',
+            padding: '10px',
+            backgroundColor: '#f4b942',
+            border: 'none',
+            borderRadius: '8px',
+            color: '#0b1e3d',
+            fontWeight: '700',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontSize: '16px',
+          }}
+        >
+          <IoLogOutOutline className="me-2" size={20} /> Cerrar Sesión
+        </button>
       </div>
+      <style>{`
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-track { background: #0b1e3d; }
+        .sidebar::-webkit-scrollbar-thumb { background: #f4b942; border-radius: 3px; }
+        .sidebar::-webkit-scrollbar-thumb:hover { background: #d4a017; }
+      `}</style>
     </div>
   );
 }
@@ -414,112 +564,83 @@ useEffect(() => {
       <div
         className="content-area flex-grow-1"
         style={{
-          marginLeft: "250px",
+          marginLeft: "280px",
           height: "100vh",
           overflow: "auto",
           paddingBottom: "80px",
           backgroundColor: "#fff",
         }}
       >
-        <Container fluid className="p-4 p-lg-5">
-          <h1 className="fw-bold mb-4">Mis Tarjetas</h1>
+        <Container fluid className="p-4 p-lg-5" style={{ paddingBottom: '100px' }}>
+          {/* Header con título y botón */}
+          <div className="mb-4">
+            <h1 className="fw-bold mb-2">Mis Tarjetas</h1>
+            {!selectedCard && (
+              <Button variant="warning" className="fw-bold" onClick={() => setShowAddModal(true)}>
+                <IoAddOutline className="me-1" size={18} />
+                Añadir tarjeta
+              </Button>
+            )}
+          </div>
 
           {/* Alertas */}
           {error && <Alert variant="danger" onClose={() => setError("")} dismissible>{error}</Alert>}
           {success && <Alert variant="success" onClose={() => setSuccess("")} dismissible>{success}</Alert>}
 
-          <Row>
-            {/* COLUMNA IZQUIERDA */}
-            <Col md={4}>
-              <Button 
-                variant="warning" 
-                className="fw-bold w-100 mb-4"
-                onClick={() => setShowAddModal(true)}
-              >
+          {isLoading && tarjetas.length === 0 ? (
+            <div className="text-center mt-5">
+              <Spinner animation="border" variant="warning" />
+              <p className="mt-2 text-muted">Cargando tarjetas...</p>
+            </div>
+          ) : tarjetas.length === 0 && !selectedCard ? (
+            <div className="text-center mt-5">
+              <IoCardOutline size={60} className="text-muted mb-3" />
+              <p className="text-muted fs-5">No tienes tarjetas registradas</p>
+              <Button variant="warning" className="fw-bold mt-2" onClick={() => setShowAddModal(true)}>
                 <IoAddOutline className="me-2" />
-                Añadir tarjeta
+                Agregar tu primera tarjeta
               </Button>
-
-              {isLoading && tarjetas.length === 0 ? (
-                <div className="text-center">
-                  <Spinner animation="border" variant="warning" />
-                  <p className="mt-2 text-muted">Cargando tarjetas...</p>
-                </div>
-              ) : tarjetas.length === 0 ? (
-                <Card className="p-4 text-center border-0 bg-light">
-                  <IoCardOutline size={40} className="text-muted mb-3" />
-                  <p className="text-muted">No tienes tarjetas registradas</p>
-                </Card>
-              ) : (
-                tarjetas.map((tarjeta) => (
-                  <Card
-                    key={tarjeta.ID_Tarjetas}
-                    className={`p-3 mb-3 shadow-sm border-0 card-hover ${
-                      selectedCard?.ID_Tarjetas === tarjeta.ID_Tarjetas ? "border border-warning" : ""
-                    }`}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => setSelectedCard(tarjeta)}
-                  >
-                    <h5 className="fw-bold">{tarjeta.Nombre}</h5>
-                    <p className="text-muted mb-1">
-                    **** **** **** {tarjeta.Numero ? tarjeta.Numero.slice(-4) : '****'}
-                    </p>
-                    <small className="text-muted">
-                      {tarjeta.Banco} • {tarjeta.Tipo_tarjeta}
-                    </small>
-                  </Card>
-                ))
-              )}
-            </Col>
-
-            {/* COLUMNA DERECHA */}
-            <Col md={8}>
-              {selectedCard ? (
-                <Card className="p-4 shadow-sm border-0">
-                  <h3 className="fw-bold mb-3">{selectedCard.Nombre}</h3>
-                  <p className="mb-1">
-                    <strong>Número:</strong> **** **** **** {selectedCard.Numero ? selectedCard.Numero.slice(-4) : '****'}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Tipo:</strong> {selectedCard.Tipo_tarjeta}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Banco:</strong> {selectedCard.Banco}
-                  </p>
-                  <p className="mb-3">
-                    <strong>Saldo:</strong> ${selectedCard.Saldo ? selectedCard.Saldo.toLocaleString() : '0.00'}
-                  </p>
-                  <p className="mb-3">
-                    <strong>Estado:</strong> {selectedCard.Estado}
-                  </p>
-
-                  {/* BOTÓN ELIMINAR */}
-                  <div className="d-flex justify-content-end mt-3">
-                    <Button 
-                      variant="danger" 
-                      size="sm"
-                      onClick={() => handleDeleteCard(selectedCard.ID_Tarjetas)}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <Spinner size="sm" />
-                      ) : (
-                        <>
-                          <IoTrashOutline className="me-1" />
-                          Eliminar tarjeta
-                        </>
-                      )}
+            </div>
+          ) : selectedCard ? (
+            /* Vista detalle */
+            <div>
+              <Button variant="outline-secondary" className="mb-4 d-flex align-items-center" onClick={() => setSelectedCard(null)}>
+                <IoArrowBackOutline className="me-2" size={18} />
+                Volver
+              </Button>
+              
+              <Row className="g-4">
+                <Col xs={12} md={7}>
+                  <CreditCardView card={selectedCard} style={{ maxWidth: '450px' }} />
+                  
+                  <div className="mt-4">
+                    <Button variant="danger" onClick={() => handleDeleteCard(selectedCard.ID_Tarjetas)} disabled={isLoading}>
+                      {isLoading ? <Spinner size="sm" /> : <><IoTrashOutline className="me-1" /> Eliminar tarjeta</>}
                     </Button>
                   </div>
-                </Card>
-              ) : (
-                <div className="text-muted text-center mt-5">
-                  <IoCardOutline size={50} className="mb-3 opacity-25" />
-                  <p>Selecciona una tarjeta para ver sus detalles</p>
-                </div>
-              )}
-            </Col>
-          </Row>
+                </Col>
+                <Col xs={12} md={5}>
+                  <div style={{ backgroundColor: '#f8f9fa', borderRadius: '12px', padding: '24px' }}>
+                    <h5 className="fw-bold mb-3">Detalles de la Tarjeta</h5>
+                    <div className="mb-2"><strong>Banco:</strong> {selectedCard.Banco}</div>
+                    <div className="mb-2"><strong>Tipo:</strong> {selectedCard.Tipo_tarjeta || 'No especificado'}</div>
+                    <div className="mb-2"><strong>Número:</strong> **** **** **** {selectedCard.Numero ? selectedCard.Numero.slice(-4) : '****'}</div>
+                    <div className="mb-2"><strong>Saldo:</strong> ${selectedCard.Saldo ? Number(selectedCard.Saldo).toLocaleString() : '0.00'}</div>
+                    <div className="mb-0"><strong>Estado:</strong> <span className="badge bg-success">{selectedCard.Estado}</span></div>
+                  </div>
+                </Col>
+              </Row>
+            </div>
+          ) : (
+            /* Grid de tarjetas */
+            <Row className="g-4">
+              {tarjetas.map((tarjeta) => (
+                <Col xs={12} sm={6} lg={4} xl={3} key={tarjeta.ID_Tarjetas}>
+                  <CreditCardView card={tarjeta} onClick={() => setSelectedCard(tarjeta)} />
+                </Col>
+              ))}
+            </Row>
+          )}
         </Container>
 
         {/* Modal para agregar tarjeta */}
