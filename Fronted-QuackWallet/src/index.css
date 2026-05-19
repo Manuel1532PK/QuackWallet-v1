@@ -1,0 +1,31 @@
+/* ---------------------------------------------------- */
+/* IMPORTANTE: Estas 3 líneas son obligatorias para Tailwind */
+/* ---------------------------------------------------- */
+
+
+/* index.css — Estilos globales y variables de color */
+:root{
+  --color-fondo: #fdd87d;   /* color principal de fondo (segundo color) */
+  --color-primario: #edbb4b;/* tercer color para botones */
+  --color-primario-dark: #d9a63c;
+  --color-cuadro: #fff9e7;  /* fondo del cuadro de login */
+  --color-texto: #231f20;
+  --color-acento: #c28a19;
+  --radius-lg: 22px;
+}
+
+/* Reset simple */
+*{box-sizing:border-box;margin:0;padding:0}
+
+html,body,#root{
+  height:100%;
+}
+
+body{
+  font-family: Inter, system-ui, Avenir, "Helvetica Neue", Arial;
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+
+}
