@@ -30,7 +30,7 @@ import {
 } from "react-icons/io5";
 
 // API
-import { userApi } from "../../api/userApi";
+import { userApi, getImageUrl } from "../../api/userApi";
 
 // Sidebar + secciones (mantén igual)
 const SECCIONES = [
@@ -243,7 +243,7 @@ function EditProfileModal({ show, onHide, user, onUpdateProfile, isLoading }) {
               <div className="mb-3">
                 {previewImagen ? (
                   <img
-                    src={previewImagen}
+                    src={getImageUrl(previewImagen)}
                     alt="Preview"
                     className="rounded-circle"
                     style={{ width: "150px", height: "150px", objectFit: "cover" }}
@@ -481,7 +481,7 @@ export default function Profile() {
                 >
                   {profileData.Imagen_Perfil ? (
                     <img
-                      src={profileData.Imagen_Perfil}
+                      src={getImageUrl(profileData.Imagen_Perfil)}
                       alt="Perfil"
                       className="rounded-circle mb-3"
                       style={{ width: "120px", height: "120px", objectFit: "cover" }}

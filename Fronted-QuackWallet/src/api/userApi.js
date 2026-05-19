@@ -1,12 +1,19 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3000/api'; // Ajusta según tu configuración
+const API_BASE_URL = 'http://localhost:3000/api';
+export const BACKEND_URL = 'http://localhost:3000';
 
 // Crear instancia de axios con configuración base
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
 });
+
+export const getImageUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
+  return `${BACKEND_URL}${path}`;
+};
 
 export const userApi = {
   // Obtener perfil completo

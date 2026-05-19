@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, useCallback } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { userApi } from "../api/userApi";
+import { userApi, getImageUrl } from "../api/userApi";
 // Importaciones de React-Bootstrap
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
@@ -98,7 +98,7 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
             <div className="p-3 text-center border-bottom" style={{backgroundColor: '#f8f9fa'}}>
                 {imagenPerfil ? (
                   <img
-                    src={imagenPerfil}
+                    src={getImageUrl(imagenPerfil)}
                     alt="Perfil"
                     className="rounded-circle mb-1"
                     style={{ width: "40px", height: "40px", objectFit: "cover" }}
