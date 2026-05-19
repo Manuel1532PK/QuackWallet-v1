@@ -42,6 +42,9 @@ app.use('/api/smartcontracts', SmartContractsRoutes);
 app.use('/api/history', historialRoutes);
 app.use('/api/cards', cardRoutes);
 
+// Servir archivos estáticos desde la carpeta uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Health check route
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'OK', message: 'API is running' });
@@ -67,9 +70,6 @@ app.use((error, req, res, next) => {
 
 // Server configuration
 const PORT = process.env.PORT || 3000;
-
-// Servir archivos estáticos desde la carpeta uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //Start Server
 app.listen(PORT, () => {
