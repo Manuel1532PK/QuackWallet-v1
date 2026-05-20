@@ -3,7 +3,9 @@ const connection = require('../config/db_config');
 // Obtener historial de transferencias
 exports.getTransferHistory = async (userId) => {
         const [rows] = await connection.execute(`
-            SELECT * FROM Transacciones WHERE ID_Usuarios = ? AND Tipo_Transaccion = 'transferencia
+            SELECT DISTINCT t.* FROM Transacciones t
+            JOIN Billeteras b ON t.ID_Billetera_Origen = b.ID_Billetera OR t.ID_Billetera_Destino = b.ID_Billetera
+            WHERE b.ID_Usuario = ? AND t.Tipo_Transaccion = 'transferencia'
             `, [userId]);
         
         return rows
@@ -12,7 +14,9 @@ exports.getTransferHistory = async (userId) => {
 // Obtener historial de retiros
 exports.getWithdrawalHistory = async (userId) => {
         const [rows] = await connection.execute(`
-            SELECT * FROM Transacciones WHERE ID_Usuarios = ? AND Tipo_Transaccion = 'retiro
+            SELECT DISTINCT t.* FROM Transacciones t
+            JOIN Billeteras b ON t.ID_Billetera_Origen = b.ID_Billetera OR t.ID_Billetera_Destino = b.ID_Billetera
+            WHERE b.ID_Usuario = ? AND t.Tipo_Transaccion = 'retiro'
         `, [userId]);
         
         return rows;
@@ -21,7 +25,9 @@ exports.getWithdrawalHistory = async (userId) => {
 // Obtener historial de depósitos
 exports.getDepositHistory = async (userId) => {
         const [rows] = await connection.execute(`
-            SELECT * FROM Transacciones WHERE ID_Usuarios = ? AND Tipo_Transaccion = 'deposito'
+            SELECT DISTINCT t.* FROM Transacciones t
+            JOIN Billeteras b ON t.ID_Billetera_Origen = b.ID_Billetera OR t.ID_Billetera_Destino = b.ID_Billetera
+            WHERE b.ID_Usuario = ? AND t.Tipo_Transaccion = 'deposito'
             `, [userId]);
         
         return rows;
@@ -30,7 +36,9 @@ exports.getDepositHistory = async (userId) => {
 // Obtener todas las transacciones
 exports.getAllTransactions = async (userId) => {
         const [rows] = await connection.execute(`
-            SELECT * FROM Transacciones WHERE ID_Usuarios = ?
+            SELECT DISTINCT t.* FROM Transacciones t
+            JOIN Billeteras b ON t.ID_Billetera_Origen = b.ID_Billetera OR t.ID_Billetera_Destino = b.ID_Billetera
+            WHERE b.ID_Usuario = ?
             `, [userId]);
         
         return rows;

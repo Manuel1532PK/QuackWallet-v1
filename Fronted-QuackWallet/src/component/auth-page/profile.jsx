@@ -108,7 +108,7 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
         padding: '14px 20px',
         borderBottom: '1px solid rgba(255,255,255,0.1)',
       }}>
-        <img src={logoSrc} alt="QuackWallet" style={{ height: '38px', marginRight: '10px' }} />
+        <img src={logoSrc} alt="QuackWallet" style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover', marginRight: '10px' }} />
         <div>
           <span style={{ color: '#f4b942', fontSize: '20px', fontWeight: '700' }}>Quack</span>
           <span style={{ color: '#ffffff', fontSize: '20px', fontWeight: '300' }}>Wallet</span>
@@ -507,7 +507,7 @@ export default function Profile() {
   const imagenPerfil = profileData.Imagen_Perfil || user?.Imagen_Perfil || null;
 
   return (
-    <div className="d-flex w-100 vh-100" style={{ backgroundColor: "#fef5da" }}>
+    <div className="d-flex w-100 vh-100" style={{ backgroundColor: "#ffffff" }}>
       <Sidebar
         user={user}
         navigate={navigate}

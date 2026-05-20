@@ -46,9 +46,11 @@ const CARD_COLORS = [
   { bg: 'linear-gradient(135deg, #4a148c 0%, #6a1b9a 50%, #8e24aa 100%)', text: '#ffffff', chip: '#f4b942' },
 ];
 
-function CreditCardView({ card, onClick, style }) {
+const GRAY_CARD = { bg: 'linear-gradient(135deg, #555 0%, #777 50%, #999 100%)', text: '#ddd', chip: '#aaa' };
+
+function CreditCardView({ card, onClick, style, inactive, actionLabel, onAction }) {
   const colorIndex = card.ID_Tarjetas ? card.ID_Tarjetas % CARD_COLORS.length : 0;
-  const colors = CARD_COLORS[colorIndex];
+  const colors = inactive ? GRAY_CARD : CARD_COLORS[colorIndex];
   const lastFour = card.Numero ? card.Numero.slice(-4) : '****';
 
   return (
@@ -94,15 +96,13 @@ function CreditCardView({ card, onClick, style }) {
         }}>
           <div style={{ position: 'absolute', width: '100%', height: '100%', background: 'rgba(255,255,255,0.15)', clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }} />
         </div>
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: colors.text, fontSize: '11px', fontWeight: '700', padding: '2px 10px', borderRadius: '10px', letterSpacing: '0.5px' }}>{card.Tipo_tarjeta || 'Tarjeta'}</div>
+        <div style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: colors.text, fontSize: '11px', fontWeight: '700', padding: '2px 10px', borderRadius: '10px', letterSpacing: '0.5px', textAlign: 'center' }}>{card.Tipo_tarjeta || 'Tarjeta'}<br /><span style={{ fontSize: '10px', fontWeight: '400', opacity: 0.8 }}>{card.Nombre}</span></div>
       </div>
 
       {/* Número */}
       <div style={{ color: colors.text, fontSize: '22px', letterSpacing: '3px', fontWeight: '500', fontFamily: 'monospace', textAlign: 'center', marginTop: '8px' }}>
         **** **** **** {lastFour}
       </div>
-
-      {/* Bottom info */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
           <div style={{ color: colors.text, fontSize: '10px', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '1px' }}>Titular</div>
@@ -113,6 +113,13 @@ function CreditCardView({ card, onClick, style }) {
           <div style={{ color: colors.text, fontSize: '16px', fontWeight: '700' }}>${card.Saldo ? Number(card.Saldo).toLocaleString() : '0.00'}</div>
         </div>
       </div>
+      {actionLabel && onAction && (
+        <div style={{ position: 'absolute', bottom: '12px', left: '50%', transform: 'translateX(-50%)', width: 'calc(100% - 48px)' }}>
+          <button onClick={(e) => { e.stopPropagation(); onAction(card.ID_Tarjetas); }} style={{ width: '100%', padding: '8px', backgroundColor: '#f4b942', border: 'none', borderRadius: '8px', color: '#0b1e3d', fontWeight: '700', cursor: 'pointer', fontSize: '13px' }}>
+            {actionLabel}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -170,7 +177,7 @@ function Sidebar({ user, navigate, handleLogout, nombreUsuario, location, imagen
         padding: '14px 20px',
         borderBottom: '1px solid rgba(255,255,255,0.1)',
       }}>
-        <img src={logoSrc} alt="QuackWallet" style={{ height: '38px', marginRight: '10px' }} />
+        <img src={logoSrc} alt="QuackWallet" style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover', marginRight: '10px' }} />
         <div>
           <span style={{ color: '#f4b942', fontSize: '20px', fontWeight: '700' }}>Quack</span>
           <span style={{ color: '#ffffff', fontSize: '20px', fontWeight: '300' }}>Wallet</span>
@@ -460,6 +467,8 @@ export default function Cards() {
   const [tarjetas, setTarjetas] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showDeleted, setShowDeleted] = useState(false);
+  const [deletedCards, setDeletedCards] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -545,6 +554,36 @@ useEffect(() => {
     }
   };
 
+  const handleViewDeleted = async () => {
+    try {
+      setIsLoading(true);
+      const response = await cardApi.getInactiveCards(user.id);
+      setDeletedCards(response.data || []);
+      setShowDeleted(true);
+      setSelectedCard(null);
+    } catch (err) {
+      console.error("Error al cargar tarjetas eliminadas:", err);
+      setError("Error al cargar tarjetas eliminadas");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleReactivate = async (cardId) => {
+    try {
+      setIsLoading(true);
+      await cardApi.reactivateCard(cardId);
+      setSuccess("Tarjeta reactivada exitosamente");
+      setDeletedCards((prev) => prev.filter((c) => c.ID_Tarjetas !== cardId));
+      await loadCards();
+    } catch (err) {
+      console.error("Error al reactivar tarjeta:", err);
+      setError(err.response?.data?.message || "Error al reactivar tarjeta");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!user) return null;
 
   const nombreUsuario = userProfile?.Nombre_Usuario || user.nombre;
@@ -573,21 +612,48 @@ useEffect(() => {
       >
         <Container fluid className="p-4 p-lg-5" style={{ paddingBottom: '100px' }}>
           {/* Header con título y botón */}
-          <div className="mb-4">
-            <h1 className="fw-bold mb-2">Mis Tarjetas</h1>
-            {!selectedCard && (
-              <Button variant="warning" className="fw-bold" onClick={() => setShowAddModal(true)}>
-                <IoAddOutline className="me-1" size={18} />
-                Añadir tarjeta
+          <div className="d-flex justify-content-between align-items-start mb-4">
+            <div>
+              {showDeleted ? (
+                <h1 className="fw-bold mb-0">Tarjetas Eliminadas</h1>
+              ) : (
+                <h1 className="fw-bold mb-0">Mis Tarjetas</h1>
+              )}
+            </div>
+            <div className="d-flex gap-2">
+              {!selectedCard && !showDeleted && (
+                <Button variant="warning" className="fw-bold" onClick={() => setShowAddModal(true)}>
+                  <IoAddOutline className="me-1" size={18} />
+                  Añadir tarjeta
+                </Button>
+              )}
+              <Button variant={showDeleted ? "success" : "danger"} className="fw-bold" onClick={showDeleted ? () => setShowDeleted(false) : handleViewDeleted}>
+                {showDeleted ? <IoArrowBackOutline className="me-1" size={18} /> : <IoTrashOutline className="me-1" size={18} />}
+                {showDeleted ? 'Activas' : 'Eliminadas'}
               </Button>
-            )}
+            </div>
           </div>
 
           {/* Alertas */}
           {error && <Alert variant="danger" onClose={() => setError("")} dismissible>{error}</Alert>}
           {success && <Alert variant="success" onClose={() => setSuccess("")} dismissible>{success}</Alert>}
 
-          {isLoading && tarjetas.length === 0 ? (
+          {showDeleted ? (
+            deletedCards.length === 0 ? (
+              <div className="text-center mt-5">
+                <IoCardOutline size={60} className="text-muted mb-3" />
+                <p className="text-muted fs-5">No tienes tarjetas eliminadas</p>
+              </div>
+            ) : (
+              <Row className="g-4">
+                {deletedCards.map((tarjeta) => (
+                  <Col xs={12} sm={6} lg={4} xl={3} key={tarjeta.ID_Tarjetas}>
+                    <CreditCardView card={tarjeta} inactive actionLabel="Reactivar" onAction={handleReactivate} />
+                  </Col>
+                ))}
+              </Row>
+            )
+          ) : isLoading && tarjetas.length === 0 ? (
             <div className="text-center mt-5">
               <Spinner animation="border" variant="warning" />
               <p className="mt-2 text-muted">Cargando tarjetas...</p>

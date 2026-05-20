@@ -6,6 +6,7 @@ const transferenceRoutes = require('./routes/transference_routes');
 const SmartContractsRoutes = require('./routes/smartcontracts_routes');
 const cardRoutes = require('./routes/card_routes');
 const historialRoutes = require('./routes/history_routes');
+const reportRoutes = require('./routes/report_routes');
 const path = require('path');
 require('dotenv').config();
 
@@ -41,13 +42,27 @@ app.use('/api/transference', transferenceRoutes);
 app.use('/api/smartcontracts', SmartContractsRoutes);
 app.use('/api/history', historialRoutes);
 app.use('/api/cards', cardRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Servir archivos estáticos desde la carpeta uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Servir build de React en produccion
+const frontendBuildPath = path.join(__dirname, '../../Fronted-QuackWallet/build');
+app.use(express.static(frontendBuildPath));
+
 // Health check route
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'OK', message: 'API is running' });
+});
+
+// SPA fallback: servir index.html para rutas del frontend
+app.use((req, res, next) => {
+    if (!req.url.startsWith('/api/') && !req.url.startsWith('/uploads/')) {
+        res.sendFile(path.join(frontendBuildPath, 'index.html'));
+    } else {
+        next();
+    }
 });
 
 //fixed 

@@ -46,6 +46,26 @@ exports.deleteCard = async (req, res) => {
     }
 };
 
+// Listar tarjetas inactivas
+exports.listInactiveCards = async (req, res) => {
+    try {
+        const cards = await cardService.listInactiveCards(req.params.userId);
+        res.status(200).json(cards);
+    } catch (error) {
+        res.status(500).json({ message: "Error al listar tarjetas eliminadas", error: error.message });
+    }
+};
+
+// Reactivar tarjeta
+exports.reactivateCard = async (req, res) => {
+    try {
+        await cardService.reactivateCard(req.params.cardId);
+        res.status(200).json({ message: "Tarjeta reactivada exitosamente" });
+    } catch (error) {
+        res.status(500).json({ message: "Error al reactivar tarjeta", error: error.message });
+    }
+};
+
 // Obtener tarjeta por ID
 exports.getCard = async (req, res) => {
     try {

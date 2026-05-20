@@ -11,6 +11,14 @@ export const cardApi = {
       }
     }),
 
+  getInactiveCards: (userId) =>
+    axios.get(`${API_URL}/cards/user/${userId}/inactive`, {
+      headers: { 
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      }
+    }),
+
   addCard: (userId, cardData) => 
     axios.post(`${API_URL}/cards/create/${userId}`, cardData, {
       headers: { 
@@ -33,5 +41,13 @@ export const cardApi = {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json'
       }
-    })
+    }),
+
+  reactivateCard: (cardId) =>
+    axios.put(`${API_URL}/cards/${cardId}/reactivate`, {}, {
+      headers: { 
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      }
+    }),
 };

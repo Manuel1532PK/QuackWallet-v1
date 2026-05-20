@@ -100,6 +100,37 @@ exports.deleteCard = async (cardId) => {
     }
 };
 
+// Listar tarjetas inactivas de un usuario
+exports.listInactiveCards = async (userId) => {
+    try {
+        const [rows] = await connection.execute(
+            'SELECT * FROM Tarjetas_Registro WHERE ID_Usuario = ? AND Estado = "Inactiva" ORDER BY Fecha_creacion DESC',
+            [userId]
+        );
+        return rows;
+    } catch (error) {
+        console.error('Error en lista de tarjetas inactivas:', error);
+        throw error;
+    }
+};
+
+// Reactivar tarjeta
+exports.reactivateCard = async (cardId) => {
+    try {
+        const [result] = await connection.execute(
+            'UPDATE Tarjetas_Registro SET Estado = "Activa" WHERE ID_Tarjetas = ?',
+            [cardId]
+        );
+        if (result.affectedRows === 0) {
+            throw new Error('Tarjeta no encontrada');
+        }
+        return true;
+    } catch (error) {
+        console.error('Error en reactivar tarjeta:', error);
+        throw error;
+    }
+};
+
 // Obtener tarjeta por ID
 exports.getCardById = async (cardId) => {
     try {
